@@ -1,6 +1,8 @@
-import axios from 'axios'
 import fs from 'fs'
-import * as changeCase from 'change-case'
+
+import axios from 'axios'
+import { paramCase } from 'change-case'
+import prettier from 'prettier'
 
 type Book = {
   participante_id: string
@@ -89,10 +91,14 @@ const run = async () => {
   const books = await fetchBooks()
   const tidiedBooks = books.map((book) => tidyBook(book))
 
-  fs.writeFileSync(
-    `./out/books-list-${changeCase.paramCase(new Date().toISOString())}.json`,
-    JSON.stringify(tidiedBooks),
-  )
+  const timestamp = paramCase(new Date().toISOString())
+  const fileName = `./out/books-list-${timestamp}.json`
+
+  const json = JSON.stringify(tidiedBooks)
+  const prettyJson = prettier.format(json, { parser: 'json-stringify' })
+
+  fs.writeFileSync(fileName, prettyJson)
+  console.log(`Created ${fileName} with ${books.length} books`)
 }
 
 run()
